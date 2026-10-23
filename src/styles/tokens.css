@@ -1,0 +1,89 @@
+/* Velon tokens: strict monochrome, fluid type, 4-pt spacing, motion numbers. */
+
+/* Size-adjusted local fallbacks (metrics from the woff2 files via capsize) so the font swap shifts nothing. */
+@font-face {
+  font-family: 'Jakarta Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 104.98%; ascent-override: 98.88%; descent-override: 21.15%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'DM Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 104.53%; ascent-override: 94.9%; descent-override: 29.66%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Mono Fallback';
+  src: local('Courier New'), local('Menlo');
+  size-adjust: 100%; ascent-override: 102%; descent-override: 30%; line-gap-override: 0%;
+}
+
+:root {
+  /* colour: black, white and the mono ramp; the only accent is inversion */
+  --white: #ffffff;
+  --paper: #fafafa;
+  --black: #0a0a0a;
+  --ink: #18181b;
+  --grey-800: #27272a;
+  --grey-700: #3f3f46;
+  --grey-600: #52525b;
+  --grey-500: #71717a;
+  --grey-400: #a1a1aa;
+  --grey-300: #d4d4d8;
+  --grey-200: #e4e4e7;
+  --grey-100: #f4f4f5;
+
+  /* tone defaults (light band); .tone-dark flips them */
+  --bg: var(--white);
+  --fg: var(--black);
+  --muted: var(--grey-600);
+  --faint: var(--grey-500);
+  --line: rgba(10, 10, 10, 0.12);
+  --line-strong: rgba(10, 10, 10, 0.9);
+
+  /* families */
+  --f-display: 'Plus Jakarta Sans Variable', 'Jakarta Fallback', system-ui, sans-serif;
+  --f-text: 'DM Sans Variable', 'DM Fallback', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono Variable', 'Mono Fallback', ui-monospace, monospace;
+
+  /* fluid type scale */
+  --t-statement: clamp(42px, 10.6vw, 164px);
+  --t-h2: clamp(34px, 4.6vw, 76px);
+  --t-h3: clamp(22px, 2vw, 32px);
+  --t-lead: clamp(18px, 1.3vw, 22px);
+  --t-body: clamp(16px, 1.05vw, 17px);
+  --t-meta: 13px;
+  --t-label: 11px;
+  --t-kicker: 10px;
+  --t-count: clamp(56px, 6.2vw, 104px);
+
+  /* spacing: 4-pt scale + fluid page rhythm */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+  --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
+  --gutter: clamp(16px, 4vw, 56px);
+  --sec: clamp(88px, 11vw, 168px);
+  --col-gap: 24px;
+  --max: 1600px;
+  --nav-h: 64px;
+  --radius-pill: 999px;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 150ms;
+  --dur-med: 280ms;
+  --dur-slow: 480ms;
+}
+
+.tone-dark {
+  --bg: var(--black);
+  --fg: var(--white);
+  --muted: var(--grey-400);
+  --faint: var(--grey-500);
+  --line: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 1024px) { :root { --col-gap: 20px; } }
+@media (max-width: 640px) { :root { --col-gap: 16px; --nav-h: 56px; } }
+@media (max-width: 640px) { :root { --t-statement: clamp(42px, 14.2vw, 92px); } }

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.dev.log
+.DS_Store
+.vercel/
+screenshots/
+.env*
+.vercel
+.deps-ready

@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import ProductDetail from '../../components/ProductDetail.astro';
+import { offeringBySlug } from '../../data/site';
+const o = offeringBySlug('works');
+---
+<Base
+  title="Velon Works: Workspace for Marketing & Digital Agencies"
+  description={o.summary}
+  path="/products/works"
+  flight={false}
+>
+  <Nav slot="header" />
+  <ProductDetail slug="works" />
+  <Footer slot="footer" />
+</Base>

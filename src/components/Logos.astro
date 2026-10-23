@@ -1,0 +1,23 @@
+---
+// Client wordmarks (mock) as a seamless marquee: two copies, the second aria-hidden (kpr useMarquee port).
+import { site } from '../data/site';
+const { logos } = site;
+// typographic "logo" treatments so text-only marks still read as distinct brands
+const styles = ['lg--a', 'lg--b', 'lg--c', 'lg--d', 'lg--e'];
+---
+<section class="logos band" aria-label={logos.label} data-flight="logos" data-flight-label="Built for">
+  <span class="logos__shadow" aria-hidden="true" data-marquee-shadow></span>
+  <div class="logos__in">
+    <p class="logos__label t-label muted"><span>{logos.label}</span></p>
+    <div class="logos__vp" data-marquee>
+      <div class="logos__track" data-marquee-track>
+        <ul class="logos__set">
+          {logos.items.map((it, i) => <li class={`lg ${styles[i % styles.length]}`}>{it.href ? <a href={it.href}>{it.name}</a> : it.name}</li>)}
+        </ul>
+        <ul class="logos__set" aria-hidden="true" data-marquee-copy>
+          {logos.items.map((it, i) => <li class={`lg ${styles[i % styles.length]}`}>{it.name}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

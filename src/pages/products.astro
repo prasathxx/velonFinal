@@ -1,0 +1,29 @@
+---
+// Standalone Products page: the home Solutions component, filtered to products, in fuller copy,
+// plus the "How engagement works" pricing block (PLAN-v3 extension, owner audit item 9).
+// flight={false}: this page isn't part of the home page's one-scroll drone choreography.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Solutions from '../components/Solutions.astro';
+import Engagement from '../components/Engagement.astro';
+import Footer from '../components/Footer.astro';
+import { products } from '../data/site';
+---
+<Base
+  title="School ERP, Property & Shopify Software"
+  path="/products"
+  flight={false}
+  description="Velon Labs' ready-to-run products: Campus, Spaces, Cart and Works. Built to be used from day one, and run with you after launch."
+>
+  <Nav slot="header" />
+  <Solutions
+    items={products}
+    id="products"
+    num="01"
+    eyebrow="Products"
+    title="Four products, built to run on day one."
+    intro="Every Velon product ships as a working system, not a framework: school operations, property management, Shopify retention and agency workspaces. Built and running before we sell it, so you start from working software, not a pitch. Pick one and go live in weeks, not quarters. Need something a ready-made product doesn't cover? See our services."
+  />
+  <Engagement />
+  <Footer slot="footer" />
+</Base>

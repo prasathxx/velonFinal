@@ -1,0 +1,13 @@
+---
+// Velon Labs logo as inline SVG so it takes the surrounding text colour. `size` is the cap height in px.
+import { site } from '../data/site';
+import { LOGO_BOX, LOGO_PATH, LOGO_TRANSFORM, LOGO_VIEWBOX } from '../data/logo';
+interface Props { class?: string; size?: number }
+const { class: cls = '', size = 22 } = Astro.props;
+const width = Math.round((size * LOGO_BOX.w) / LOGO_BOX.h);
+---
+<span class={`wordmark ${cls}`}>
+  <svg class="wordmark__logo" width={width} height={size} viewBox={LOGO_VIEWBOX} fill="currentColor" role="img" aria-label={site.meta.name} focusable="false">
+    <g transform={LOGO_TRANSFORM}><path d={LOGO_PATH} /></g>
+  </svg>
+</span>

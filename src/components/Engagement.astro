@@ -1,0 +1,32 @@
+---
+// "How engagement works" (PLAN-v3 extension, owner audit item 9): two plain statements on how a
+// product subscription vs. a custom build is paid for. Bracket placeholders are literal — the
+// owner fills the price and unit in later. Reuses SectionHead + the same hairline-divided layout
+// idiom as the bento grid, so it needs no new visual language.
+import { site } from '../data/site';
+import SectionHead from './SectionHead.astro';
+const { engagement } = site;
+---
+<section id="engagement" class="engagement band sec" aria-labelledby="engagement-title">
+  <div class="wrap">
+    <SectionHead id="engagement-title" num="02" eyebrow={engagement.eyebrow} title={engagement.title} intro={engagement.intro} />
+    <ul class="engagement__list">
+      {engagement.items.map((it) => (
+        <li class="engagement__item">
+          <h3 class="t-h3 engagement__name">{it.title}</h3>
+          <p class="t-body muted">{it.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .engagement__list {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); margin-top: clamp(28px, 3vw, 44px);
+  }
+  .engagement__item { background: var(--bg); padding: clamp(24px, 2.4vw, 40px); display: grid; gap: 10px; align-content: start; }
+  .engagement__name { margin: 0; }
+  @media (max-width: 640px) { .engagement__list { grid-template-columns: 1fr; } }
+</style>

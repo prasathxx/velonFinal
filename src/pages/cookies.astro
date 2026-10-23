@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { site } from '../data/site';
+
+const { meta } = site;
+const VERSION_DATE = '2026-10-21';
+---
+<Base title="Cookies" description={`What ${meta.name} does and doesn't use cookies for.`} path="/cookies" flight={false}>
+  <Nav slot="header" />
+  <LegalPage title="Cookies" versionDate={VERSION_DATE} intro="We keep this simple: we don't use non-essential cookies, so there's no cookie banner on this site.">
+    <h2>What we don't do</h2>
+    <p>We don't run analytics, advertising, or tracking cookies of any kind. We don't build a profile of your visit, and we don't share browsing data with third parties.</p>
+
+    <h2>What might be set</h2>
+    <p>The contact form on <a href="/contact">/contact</a> uses Cloudflare Turnstile to filter out bots. Turnstile may set a strictly necessary cookie while you're completing the form, purely to tell real visitors from automated traffic. It isn't used for tracking or advertising, and it doesn't require consent under most cookie laws because it's necessary for the service you've asked for (submitting the form).</p>
+
+    <h2>If this changes</h2>
+    <p>If we ever add analytics or marketing cookies, we'll update this page and add a consent banner before any such cookie is set.</p>
+
+    <h2>Questions</h2>
+    <p>Email <a href={`mailto:${meta.email}`}>{meta.email}</a>.</p>
+  </LegalPage>
+  <Footer slot="footer" />
+</Base>

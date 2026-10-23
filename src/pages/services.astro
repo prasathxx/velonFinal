@@ -1,0 +1,25 @@
+---
+// Standalone Services page: the home Solutions component, filtered to services, in fuller copy.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Solutions from '../components/Solutions.astro';
+import Footer from '../components/Footer.astro';
+import { services } from '../data/site';
+---
+<Base
+  title="Services"
+  path="/services"
+  flight={false}
+  description="Velon Labs' services: Build (custom software and AI systems) and Studio (branding, content and growth). The other way we work with you."
+>
+  <Nav slot="header" />
+  <Solutions
+    items={services}
+    id="services"
+    num="01"
+    eyebrow="Services"
+    title="Two ways we build around you."
+    intro="Not every problem fits a ready-made product. Build is our custom software and AI team: agents, ERP, CRM, HRM, automations and 3D websites, built to your brief. Studio handles the branding, content, storytelling and growth work that makes a launch land. Looking for something off the shelf instead? See our products."
+  />
+  <Footer slot="footer" />
+</Base>

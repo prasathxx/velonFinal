@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { site } from '../data/site';
+
+const { meta } = site;
+const VERSION_DATE = '2026-10-21';
+---
+<Base title="Privacy policy" description={`How ${meta.name} collects, uses and protects the information you share with us.`} path="/privacy" flight={false}>
+  <Nav slot="header" />
+  <LegalPage title="Privacy policy" versionDate={VERSION_DATE} intro="This policy explains what we collect through this site and why, in plain English, under India's Digital Personal Data Protection Act, 2023 (DPDP Act).">
+    <h2>Who controls your data</h2>
+    <p>The data controller (the entity that decides what this site collects and why) is <strong>{meta.legalName}</strong>, {meta.address}.</p>
+
+    <h2>What we collect</h2>
+    <p>When you use the contact form at <a href="/contact">/contact</a>, we collect exactly these fields:</p>
+    <ul>
+      <li>Your name</li>
+      <li>Your email address</li>
+      <li>Your company name, if you give it (optional)</li>
+      <li>Your phone number, if you give it (optional)</li>
+      <li>What you're interested in (a product or service)</li>
+      <li>Your message</li>
+      <li>The page you submitted from, and the campaign source, if you arrived through a tracked link</li>
+      <li>Your consent to be contacted, and the version of this policy you agreed to</li>
+    </ul>
+    <p>We don't use cookies for analytics or advertising, and we don't track you across other sites. See <a href="/cookies">/cookies</a> for the one strictly-necessary cookie our spam filter may set.</p>
+
+    <h2>Why we collect it</h2>
+    <p>Only to reply to your enquiry: to understand what you're asking about, get back to you by email or phone, and keep a record of the conversation.</p>
+
+    <h2>Who processes it</h2>
+    <p>We use a small number of service providers to run this site and handle enquiries:</p>
+    <ul>
+      <li><strong>Vercel</strong> — hosts this website and the contact form.</li>
+      <li><strong>Google (Sheets)</strong> — stores the enquiries you submit, in a private spreadsheet only our team can access.</li>
+      <li><strong>Cloudflare (Turnstile)</strong> — checks that a form submission is from a real person, not a bot, before we accept it.</li>
+    </ul>
+    <p>None of these providers may use your information for their own purposes; they process it only on our instructions.</p>
+    <p>Vercel, Google and Cloudflare operate global infrastructure, so your data may be processed and stored on servers outside India, including in jurisdictions with different data protection laws. We only use these providers' standard business services, under their own data processing terms.</p>
+
+    <h2>How long we keep it</h2>
+    <p>We retain enquiry records for 24 months from the date you submit them, after which they are deleted.</p>
+
+    <h2>Your rights</h2>
+    <p>Under the DPDP Act, you can ask us to:</p>
+    <ul>
+      <li><strong>Access</strong> the personal data we hold about you</li>
+      <li><strong>Correct</strong> inaccurate or incomplete data</li>
+      <li><strong>Erase</strong> your data, where we're not required to keep it for a legal reason</li>
+      <li><strong>Withdraw consent</strong> at any time, which stops future contact but doesn't undo anything already done with your earlier consent</li>
+    </ul>
+
+    <h2>Grievance contact</h2>
+    <p>We haven't yet appointed a named grievance officer. Until we do, write to <a href={`mailto:${meta.email}`}>{meta.email}</a> with any question, request or complaint about how we handle your data. We aim to respond within one working day.</p>
+  </LegalPage>
+  <Footer slot="footer" />
+</Base>

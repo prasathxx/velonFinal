@@ -1,0 +1,17 @@
+---
+// Pill button with the directional fill + label hop (motion.ts setupBtn); plain colour swap without JS.
+interface Props {
+  href: string; label: string; variant?: 'solid' | 'ghost'; size?: 'md' | 'sm';
+  magnetic?: boolean; arrow?: boolean; class?: string; [k: string]: unknown;
+}
+const { href, label, variant = 'solid', size = 'md', magnetic = false, arrow = true, class: cls = '', ...rest } = Astro.props;
+const classes = ['btn', variant === 'ghost' && 'btn--ghost', size === 'sm' && 'btn--sm', cls].filter(Boolean).join(' ');
+---
+<a href={href} class={classes} data-btn {...(magnetic ? { 'data-magnetic': '' } : {})} {...rest}>
+  <span class="btn__in"><span class="btn__t">{label}</span></span>
+  {arrow && (
+    <svg class="btn__arrow" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+      <path d="M1 7h11M7.5 2.5 12 7l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+    </svg>
+  )}
+</a>

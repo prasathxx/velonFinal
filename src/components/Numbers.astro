@@ -1,0 +1,32 @@
+---
+// Four counters (kpr useCounter port in motion.ts). Final values are server-rendered, so no-JS and
+// reduced motion read them as-is; the counter only rewinds them to zero when it arms.
+import { site } from '../data/site';
+import SectionHead from './SectionHead.astro';
+const { numbers } = site;
+const fmt = (v: number, d = 0) => new Intl.NumberFormat('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+---
+<section class="numbers band sec fx-bg" aria-labelledby="numbers-title" data-flight="numbers" data-flight-label="Numbers">
+  <div class="numbers__tex" aria-hidden="true"></div>
+  <div class="wrap">
+    <SectionHead id="numbers-title" num="04" eyebrow={numbers.eyebrow} title={numbers.title} />
+    <dl class="stats" data-reveal="stagger">
+      {numbers.items.map((s, i) => (
+        <div class={`stat${i % 2 === 0 ? ' is-fore' : ''}`} data-depth={i % 2 === 0 ? 0.5 : -0.5}>
+          <dt class="stat__label t-label">{s.label}</dt>
+          <dd class="stat__value">
+            {s.value !== undefined ? (
+              <>
+                <span class="stat__num" data-count={s.value} data-decimals={s.decimals ?? 0}>{fmt(s.value, s.decimals ?? 0)}</span>
+                {s.suffix && <span class="stat__suf">{s.suffix}</span>}
+              </>
+            ) : (
+              <span class="stat__text">{s.display}</span>
+            )}
+          </dd>
+          {s.note && <dd class="stat__note t-meta muted">{s.note}</dd>}
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>

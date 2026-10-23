@@ -1,0 +1,89 @@
+---
+import '@fontsource-variable/plus-jakarta-sans/wght.css';
+import '@fontsource-variable/dm-sans/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import '../styles/sections.css';
+import '../styles/v2.css';
+import '../styles/glass.css';
+import jakartaUrl from '@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2?url';
+import dmUrl from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url';
+import { site } from '../data/site';
+import Telemetry from '../components/Telemetry.astro';
+import Pass from '../components/Pass.astro';
+
+// Per-page SEO (PLAN-v3 §SEO): every page passes its own title/description/path; Base composes the
+// `%s — Velon Labs` title and the canonical from `path`. `flight` turns off the drone + HUD for pages
+// that aren't part of the home page's one-scroll choreography (the access pass still shows everywhere).
+interface Props { title: string; description?: string; path?: string; flight?: boolean }
+const { meta } = site;
+const { title, description = meta.description, path = '/', flight = true } = Astro.props;
+const pageTitle = `${title} — ${meta.name}`;
+const canonical = new URL(path, Astro.site ?? meta.url).href;
+const ogImage = new URL('/og.jpg', Astro.site ?? meta.url).href;
+---
+<!doctype html>
+<html lang="en" class="no-js" {...(flight ? {} : { 'data-flight': 'off' })}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={meta.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="preload" href={jakartaUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={dmUrl} as="font" type="font/woff2" crossorigin />
+    <slot name="head" />
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.remove('no-js'); d.classList.add('js');
+        var rm = false;
+        try { rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+        if (d.getAttribute('data-motion') === 'off' || /[?&](motion=off|tier=rm)\b/.test(location.search)) { rm = true; d.setAttribute('data-motion', 'off'); }
+        window.__velon = { flightReady: false, badgeReady: false };
+        if (rm) d.classList.add('rm');
+        var first = true;
+        try { first = !sessionStorage.getItem('velon-seen'); } catch (e) {}
+        if (first && !rm) d.classList.add('is-loading');
+        // safety net: if the motion module never arms, show everything
+        setTimeout(function () { if (!d.classList.contains('motion-ready')) { d.classList.add('reveal-fallback'); d.classList.remove('is-loading'); } }, 3500);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="loader" aria-hidden="true">
+      <div class="loader__mark">{[...meta.name].map((c) => <span class="ch">{c}</span>)}</div>
+      <div class="loader__bar"></div>
+    </div>
+    <slot name="header" />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <slot name="footer" />
+    <div class="cast" aria-hidden="true" data-cast-shadow></div>
+    <div id="flight" class="flight" aria-hidden="true"></div>
+    <Pass />
+    <Telemetry />
+    <div id="cursor" aria-hidden="true"><div class="cur__dot"><span class="cur__label"></span></div></div>
+    <script>
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+---
+// One quote is the design; with more than one they cycle every 7 s (paused on hover/focus).
+// Quotes share one grid cell, so the block is always as tall as the longest: no shift on swap.
+import { site } from '../data/site';
+import Label from './Label.astro';
+const { quotes } = site;
+const many = quotes.items.length > 1;
+---
+<section class="quote band tone-dark sec fx-bg" aria-label={quotes.eyebrow} data-quotes data-flight="quote" data-flight-label="Voice">
+  <div class="backdrop backdrop--dark" aria-hidden="true"></div>
+  <div class="wrap grid quote__grid">
+    <div class="quote__side">
+      <Label num="06" text={quotes.eyebrow} data-reveal="fade" />
+      {many && (
+        <div class="quote__count t-label muted" aria-hidden="true" data-reveal="fade">
+          <span data-quote-i>01</span> / {String(quotes.items.length).padStart(2, '0')}
+        </div>
+      )}
+    </div>
+    <div class="quote__stack is-fore" data-quote-stack data-depth="0.5">
+      {quotes.items.map((q, i) => (
+        <figure class={`quote__item${i === 0 ? ' is-active' : ''}`} data-quote={i} aria-hidden={i === 0 ? undefined : 'true'}>
+          <blockquote class="quote__text" data-quote-text>
+            <p>{q.quote}</p>
+          </blockquote>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>

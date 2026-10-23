@@ -1,0 +1,14 @@
+---
+// Hairline-divided fact pill (OmiCare IdentityCard pattern): mono label over value, cells split by 1px lines.
+import type { Fact } from '../data/site';
+interface Props { facts: Fact[]; class?: string; [k: string]: unknown }
+const { facts, class: cls = '', ...rest } = Astro.props;
+---
+<dl class={`pill ${cls}`} {...rest}>
+  {facts.map((f) => (
+    <div class="pill__cell">
+      <dt class="pill__k t-kicker">{f.label}</dt>
+      <dd class="pill__v">{f.value}{f.suffix && <small>{f.suffix}</small>}</dd>
+    </div>
+  ))}
+</dl>

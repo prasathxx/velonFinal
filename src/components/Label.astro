@@ -1,0 +1,9 @@
+---
+// Numbered mono label: "02 — Solutions" (OmiCare StreamMark convention).
+interface Props { num?: string; text: string; class?: string; as?: 'p' | 'span' | 'div'; [k: string]: unknown }
+const { num, text, class: cls = '', as: Tag = 'p', ...rest } = Astro.props;
+---
+<Tag class={`label t-label ${cls}`} {...rest}>
+  {num && <span class="label__n">{num}</span>}
+  <span class="label__t">{text}</span>
+</Tag>

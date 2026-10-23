@@ -1,0 +1,57 @@
+---
+// Desktop (motion on): a pinned horizontal rail of case cards the drone escorts (motion.ts startRail).
+// Phone, tablet, reduced motion and no-JS: the same markup reads as the v1 editorial list.
+// Home uses the full Focus list (unchanged look); /focus passes the same list again as the standalone page.
+import { site, hrefFor, offeringBySlug, type Case, type Link } from '../data/site';
+import SectionHead from './SectionHead.astro';
+import Arrow from './Arrow.astro';
+import RollLink from './RollLink.astro';
+import { publicImage } from '../lib/public-image';
+interface Props {
+  items?: Case[]; eyebrow?: string; title?: string; intro?: string; id?: string; seeAll?: Link[];
+}
+const {
+  items = site.cases.items,
+  eyebrow = site.cases.eyebrow,
+  title = site.cases.title,
+  intro = site.cases.intro,
+  id = 'work',
+  seeAll,
+} = Astro.props;
+const N = items.length;
+---
+<section id={id} class="cases band sec fx-bg" aria-labelledby={`${id}-title`} data-flight="work" data-flight-label="Focus" data-rail-sec>
+  <div class="cases__pin is-fore" data-depth="0.3">
+    <div class="backdrop backdrop--dots" aria-hidden="true"></div>
+    <div class="wrap cases__head">
+      <SectionHead id={`${id}-title`} num="05" eyebrow={eyebrow} title={title} intro={intro} />
+      <p class="cases__count t-label muted" aria-hidden="true"><span data-rail-i>01</span> / {String(N).padStart(2, '0')}</p>
+    </div>
+    <div class="cases__vp" data-rail-vp>
+      <ol class="cases__list wrap" data-rail-track>
+        {items.map((c, i) => (
+          <li class={`case${i === N - 1 ? ' case--last' : ''}`} data-rail-card>
+            <span class="rule case__rule" data-reveal="rule"></span>
+            <a href={hrefFor(offeringBySlug(c.offeringSlug))} class="case__row" data-cursor="Read" data-case={i}>
+              <span class={`case__thumb pat-${i % 5}${publicImage(c.image) ? ' has-img' : ''}`} aria-hidden="true" style={publicImage(c.image) ? `background-image:url(${c.image})` : undefined}>
+                <span class="case__mono">{c.monogram}</span>
+                <span class="t-kicker case__thumb-k">{c.year ? `${c.client} — ${c.year}` : c.client}</span>
+              </span>
+              <span class="case__meta t-label">{c.year && <span>{c.year}</span>}<span class="case__sector">{c.sector}</span></span>
+              <span class="case__client t-label">{c.client}</span>
+              <span class="case__outcome t-h3">{c.outcome}</span>
+              <span class="case__arrow"><Arrow size={22} /></span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <div class="case case--end" aria-hidden="true"><span class="rule case__rule" data-reveal="rule"></span></div>
+    </div>
+    <div class="wrap cases__progress" aria-hidden="true"><span class="cases__bar"><i data-rail-bar></i></span></div>
+    {seeAll && (
+      <p class="wrap section__more" data-reveal="fade">
+        {seeAll.map((s) => <RollLink href={s.href} label={s.label} class="t-label section__more-link" />)}
+      </p>
+    )}
+  </div>
+</section>

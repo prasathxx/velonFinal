@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { site } from '../data/site';
+
+const { meta } = site;
+const VERSION_DATE = '2026-10-21';
+const SECURITY_EMAIL = 'security@velonlabs.in';
+---
+<Base title="Security" description={`How ${meta.name} secures this website and the data it collects.`} path="/security" flight={false}>
+  <Nav slot="header" />
+  <LegalPage title="Security" versionDate={VERSION_DATE} intro="A short note on how this site and the enquiries it collects are protected.">
+    <h2>Hosting</h2>
+    <p>This site is hosted on Vercel's global edge network. Every page and API route is served over HTTPS; plain HTTP requests are upgraded automatically, and we send HSTS headers so browsers remember to always use HTTPS for this domain.</p>
+
+    <h2>The contact form</h2>
+    <p>Submissions are checked by Cloudflare Turnstile to filter out automated/bot traffic, rate-limited per visitor, and validated on the server before anything is stored. Form data typed by a visitor is stored as plain text, never evaluated as a formula or code.</p>
+
+    <h2>Access to enquiry data</h2>
+    <p>Enquiries submitted through this site are stored in a private Google Sheet, accessible only to a small number of named Velon Labs team members. We don't share this data with anyone outside the processors listed in our <a href="/privacy">privacy policy</a>.</p>
+
+    <h2>Reporting a security issue</h2>
+    <p>If you've found a security issue with this site, please tell us before disclosing it publicly. Email <a href={`mailto:${SECURITY_EMAIL}`}>{SECURITY_EMAIL}</a> with details and, if possible, steps to reproduce it. We'll acknowledge reports within one working day.</p>
+    <p>You can also find this contact in machine-readable form at <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</p>
+  </LegalPage>
+  <Footer slot="footer" />
+</Base>

@@ -1,0 +1,42 @@
+---
+import { site } from '../data/site';
+import Wordmark from './Wordmark.astro';
+import RollLink from './RollLink.astro';
+const { footer, meta } = site;
+// spaces become no-break spaces so the inline-block letters keep the gap; the size scales down from the
+// 5-letter "VELON" the type was tuned for, so longer names still fit one line
+const giant = [...meta.name.toUpperCase()].map((c) => (c === ' ' ? '\u00A0' : c));
+const giantK = (0.272 * 5) / Math.max(5, giant.length - 0.6 * giant.filter((c) => c === '\u00A0').length);
+---
+<footer class="footer band tone-dark fx-bg" aria-label="Site footer" data-flight="footer" data-flight-label="Footer">
+  <div class="backdrop backdrop--dark" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="footer__top grid">
+      <div class="footer__brand">
+        <Wordmark size={26} />
+        <p class="t-meta muted footer__blurb">{footer.blurb}</p>
+        <RollLink href={`mailto:${meta.email}`} label={meta.email} class="t-meta footer__mail" />
+      </div>
+      {footer.columns.map((c) => (
+        <nav class="footer__col" aria-label={c.title}>
+          <p class="t-kicker muted">{c.title}</p>
+          <ul>{c.links.map((l) => <li><RollLink href={l.href} label={l.label} class="t-meta" /></li>)}</ul>
+        </nav>
+      ))}
+    </div>
+    <div class="footer__bar">
+      <div class="footer__legal">
+        <p class="t-kicker muted">{footer.legal}</p>
+        {footer.legalId && <p class="t-kicker muted">{footer.legalId}</p>}
+        <p class="t-kicker muted footer__credits">{footer.credits}</p>
+      </div>
+      <button type="button" class="footer__top-btn t-label" data-to-top>
+        <span>{footer.backToTop}</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 11V1.5M1.5 6 6 1.5 10.5 6" fill="none" stroke="currentColor" stroke-width="1.3" /></svg>
+      </button>
+    </div>
+  </div>
+  <div class="footer__giant" aria-hidden="true" data-giant style={`--giant-k:${giantK.toFixed(3)}`}>
+    <span class="footer__giant-in">{giant.map((c) => <span class="g">{c}</span>)}</span>
+  </div>
+</footer>

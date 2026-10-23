@@ -1,0 +1,16 @@
+---
+// Flight HUD (desktop, flight mounted): WP 02 / SOLUTIONS · ALT 0.84 · HDG 114.
+// Values are written by flight-bridge.ts from the store; digits scramble on waypoint change.
+import { site } from '../data/site';
+const L = site.telemetry.labels;
+---
+<div class="hud t-kicker" aria-hidden="true" data-hud>
+  <span class="hud__dot"></span>
+  <span>{L.waypoint} <b data-hud-wp>01</b></span>
+  <span class="hud__sep">/</span>
+  <b data-hud-sec>HERO</b>
+  <span class="hud__sep">·</span>
+  <span>{L.altitude} <b data-hud-alt>1.20</b></span>
+  <span class="hud__sep">·</span>
+  <span>{L.heading} <b data-hud-hdg>092</b></span>
+</div>

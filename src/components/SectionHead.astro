@@ -1,0 +1,11 @@
+---
+import Label from './Label.astro';
+interface Props { num: string; eyebrow: string; title: string; intro?: string; id: string; depth?: number }
+const { num, eyebrow, title, intro, id, depth } = Astro.props;
+const fore = depth !== undefined && depth > 0;
+---
+<div class="head grid">
+  <Label num={num} text={eyebrow} class="head__label" data-reveal="fade" />
+  <h2 id={id} class={`t-h2 head__title${fore ? ' is-fore' : ''}`} data-reveal="lines" data-depth={depth}>{title}</h2>
+  {intro && <p class="t-lead head__intro" data-reveal="fade" data-delay="0.15">{intro}</p>}
+</div>

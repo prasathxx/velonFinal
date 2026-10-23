@@ -1,0 +1,276 @@
+/* v3 "Glass": black & white frosted glass over textured bands, the depth planes the drone weaves through,
+   and the fixed access pass. Loaded last: it restyles v1/v2 surfaces without touching their layouts. */
+
+/* ================================================================ TOKENS */
+:root {
+  /* right-hand lane owned by the hanging pass (nav stops short of it, hero top row pads into it) */
+  --pass-lane: 168px;
+  --pass-c: 84px;        /* card centre from the right edge */
+  --pass-card: 128px;    /* card width */
+  --pass-w: 380px; --pass-h: 600px;
+
+  --glass-fill: rgba(255, 255, 255, .56);
+  --glass-fill-hi: rgba(255, 255, 255, .78);
+  --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .35) 38%, rgba(10, 10, 10, .1) 100%);
+  --glass-ring: rgba(10, 10, 10, .07);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9);
+  --glass-shadow: 0 1px 2px rgba(10, 10, 10, .05), 0 18px 40px -18px rgba(10, 10, 10, .22);
+  --glass-blur: blur(18px) saturate(170%);
+  --glass-r: 22px;
+  --dot: rgba(10, 10, 10, .13);
+  --blob: rgba(10, 10, 10, .075);
+}
+.tone-dark, .nav.is-dark, .hud {
+  --glass-fill: rgba(255, 255, 255, .06);
+  --glass-fill-hi: rgba(255, 255, 255, .1);
+  --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .08) 40%, rgba(255, 255, 255, .02) 100%);
+  --glass-ring: rgba(255, 255, 255, .02);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .12);
+  --glass-shadow: 0 24px 60px -24px rgba(0, 0, 0, .9);
+  --dot: rgba(255, 255, 255, .12);
+  --blob: rgba(255, 255, 255, .07);
+}
+@media (max-width: 1024px) { :root { --pass-lane: 132px; --pass-c: 66px; --pass-card: 102px; --pass-w: 300px; --pass-h: 480px; } }
+@media (max-width: 640px) { :root { --pass-lane: 84px; --pass-c: 44px; --pass-card: 70px; --pass-w: 200px; --pass-h: 330px; --glass-r: 18px; } }
+
+/* the glass surface: translucent fill, light-catching 1 px rim (gradient border), inner highlight, soft drop */
+.nav__in, .btn, .pill, .card, .stat, html.rail .case__row, .process.is-pinned .steps, .process__index li,
+.hud, .footer__top, .footer__bar, .cta__info > div, .quote__by, .pass__hint, .menu__list {
+  background: linear-gradient(var(--glass-fill), var(--glass-fill)) padding-box, var(--glass-rim) border-box;
+  border: 1px solid transparent;
+  box-shadow: var(--glass-hi), 0 0 0 1px var(--glass-ring), var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+/* no backdrop-filter: the same surfaces, near-opaque so text keeps its contrast */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root { --glass-fill: rgba(255, 255, 255, .93); --glass-fill-hi: rgba(255, 255, 255, .97); }
+  .tone-dark, .nav.is-dark, .hud { --glass-fill: rgba(28, 28, 31, .94); --glass-fill-hi: rgba(36, 36, 40, .96); }
+}
+
+/* ================================================================ BACKDROPS: something for the glass to frost
+   Static texture (dot grid faded by a mask + soft graphite blobs) behind each glass band. Content above
+   it is positioned (z auto) so it paints after the backdrop; nothing here is a stacking context. */
+.fx-bg > .wrap, .fx-bg > .hero__in, .process__pin > .wrap, .cases__pin > .wrap, .cases__pin > .cases__vp { position: relative; }
+.backdrop { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.backdrop::before, .backdrop::after { content: ''; position: absolute; inset: 0; }
+.backdrop::before {
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.5px);
+  background-size: 22px 22px; background-position: 11px 11px;
+  -webkit-mask-image: radial-gradient(60% 55% at 72% 46%, #000 0%, rgba(0, 0, 0, .55) 45%, transparent 78%);
+  mask-image: radial-gradient(60% 55% at 72% 46%, #000 0%, rgba(0, 0, 0, .55) 45%, transparent 78%);
+}
+.backdrop::after {
+  background:
+    radial-gradient(26% 34% at 78% 38%, var(--blob), transparent 70%),
+    radial-gradient(30% 28% at 18% 74%, var(--blob), transparent 72%),
+    radial-gradient(18% 22% at 46% 18%, var(--blob), transparent 70%);
+}
+.backdrop--hero::before {
+  -webkit-mask-image: radial-gradient(50% 46% at 82% 86%, #000, transparent 75%);
+  mask-image: radial-gradient(50% 46% at 82% 86%, #000, transparent 75%);
+}
+.backdrop--hero::after { background: radial-gradient(34% 40% at 74% 48%, rgba(10, 10, 10, .05), transparent 70%); }
+.backdrop--dots::before {
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+}
+.backdrop--cta::before {
+  -webkit-mask-image: radial-gradient(55% 60% at 70% 40%, #000, transparent 75%);
+  mask-image: radial-gradient(55% 60% at 70% 40%, #000, transparent 75%);
+}
+
+/* ================================================================ DEPTH PLANES
+   [data-depth] elements are positioned; .is-fore lifts one above the flight canvas (z 5). flight-bridge.ts
+   swaps .is-fore as the drone's depth crosses the plane, never while the two overlap. */
+[data-depth] { position: relative; }
+.is-fore { z-index: 6; }
+.t-statement .ln[data-depth] { width: fit-content; }
+/* a hairline of page colour around front-plane type: crisp layering where black type crosses the drone */
+.t-statement .ln.is-fore:not(.is-outline) { -webkit-text-stroke: .045em var(--bg); paint-order: stroke fill; }
+.head__title.is-fore { -webkit-text-stroke: .07em var(--bg); paint-order: stroke fill; }
+.flight { transition: opacity .8s linear; will-change: filter; }
+/* the drone's cast shadow on the page (white bands, drone near the page plane) */
+.cast {
+  position: fixed; left: 0; top: 0; z-index: 4; width: 200px; height: 52px; pointer-events: none;
+  border-radius: 50%; opacity: 0; transform-origin: 0 0; will-change: transform, opacity;
+  background: radial-gradient(closest-side, rgba(10, 10, 10, .34), rgba(10, 10, 10, .12) 55%, transparent);
+}
+html.rm .cast, html[data-tier='nogl'] .cast { display: none; }
+
+/* ================================================================ NAV: glass capsule, clear of the pass lane */
+.nav {
+  inset: 0 0 auto 0; height: auto; padding: 10px var(--pass-lane) 0 var(--gutter);
+  color: var(--fg); mix-blend-mode: normal; pointer-events: none;
+}
+.nav::after { display: none; }
+.nav__in.wrap {
+  pointer-events: auto; max-width: none; margin: 0; height: 54px; padding: 0 7px 0 22px; border-radius: 999px;
+  transition: background-color .4s linear, color .4s linear;
+}
+.nav.is-dark { color: var(--white); --fg: var(--white); --bg: var(--black); --muted: var(--grey-400); --line: rgba(255, 255, 255, .14); }
+.nav .nav__cta { min-height: 40px; }
+@media (max-width: 760px) {
+  .nav__in.wrap { height: 50px; padding: 0 6px 0 18px; }
+  .nav__menu { padding-inline: 12px; }
+}
+@media (max-width: 640px) { .nav { padding-top: 8px; padding-left: 12px; } }
+.menu__in { padding-top: calc(var(--nav-h) + 40px); }
+.menu__list { border-radius: var(--glass-r); padding: 4px 20px; border-top: 1px solid transparent; }
+.menu__list li:last-child .menu__link { border-bottom: 0; }
+
+/* ================================================================ BUTTONS + PILLS */
+.btn { --glass-fill: rgba(10, 10, 10, .9); --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, .06) 45%, rgba(255, 255, 255, .02)); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .2); border: 1px solid transparent; }
+.tone-dark .btn, .nav.is-dark .btn { --glass-fill: rgba(255, 255, 255, .92); --glass-rim: linear-gradient(150deg, #fff, rgba(255, 255, 255, .5)); --glass-hi: inset 0 -1px 0 rgba(10, 10, 10, .08); }
+.btn--ghost { --glass-fill: rgba(255, 255, 255, .5); --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .95), rgba(10, 10, 10, .22) 60%, rgba(10, 10, 10, .32)); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .9); }
+.tone-dark .btn--ghost { --glass-fill: rgba(255, 255, 255, .06); --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .14)); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .12); }
+.btn::before { inset: 0; }
+html:not(.fx) .btn:hover { background: var(--b-fill); }
+
+.pill { gap: 0; border-radius: 999px; overflow: visible; }
+.pill__cell { background: transparent; }
+.pill__cell + .pill__cell { box-shadow: inset 1px 0 0 var(--line); }
+@media (max-width: 640px) {
+  .pill { border-radius: 18px; }
+  .pill__cell + .pill__cell { box-shadow: inset 1px 0 0 var(--line); }
+}
+
+/* ================================================================ HERO */
+.hero__top { padding-right: max(0px, calc(var(--pass-lane) - var(--gutter))); }
+.hero__poster {
+  right: calc(var(--gutter) + 2vw); top: calc(var(--nav-h) + 28vh); width: clamp(240px, 42vw, 640px);
+}
+@media (max-width: 640px) {
+  .hero__eyebrow { max-width: calc(100% - var(--pass-lane) + var(--gutter)); }
+  .hero__poster { width: 62vw; top: calc(var(--nav-h) + 150px); right: 10px; }
+}
+
+/* ================================================================ SOLUTIONS: separate glass cards */
+.bento { gap: clamp(12px, 1.2vw, 18px); background: none; border: 0; }
+.bento__cell { background: none; }
+.card { border-radius: var(--glass-r); }
+.card__tags li { background: rgba(255, 255, 255, .4); }
+/* thin glass: the drone flying behind the grid reads through the open upper half of each card as a
+   frosted silhouette; the copy sits on its own denser frost (≥ 5:1 for muted text over the darkest drone) */
+.solutions .card { --cp: clamp(24px, 2.4vw, 40px); --glass-fill: rgba(255, 255, 255, .14); --glass-blur: blur(3px) saturate(140%); }
+.solutions .card__body {
+  margin: 0 calc(-1 * var(--cp)) calc(-1 * var(--cp)); padding: 30px var(--cp) var(--cp);
+  border-radius: 0 0 calc(var(--glass-r) - 1px) calc(var(--glass-r) - 1px);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, .8) 30px);
+  transition: background-color .35s var(--ease-expo);
+}
+/* the gutters frost too, so a drone straddling two cards never shows a crisp sliver between them */
+.solutions .bento { isolation: isolate; }
+.solutions .bento::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: var(--glass-r);
+  background: rgba(255, 255, 255, .38); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .solutions .card { --glass-fill: rgba(255, 255, 255, .93); }
+}
+@media (hover: hover) {
+  .card:hover { --glass-fill: rgba(10, 10, 10, .86); --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .4), rgba(255, 255, 255, .06)); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .16); background: linear-gradient(var(--glass-fill), var(--glass-fill)) padding-box, var(--glass-rim) border-box; }
+  .card:hover .card__tags li { background: rgba(255, 255, 255, .06); }
+  .card:hover .card__body { background: none; }
+}
+.card:focus-visible .card__body { background: none; }
+.card:focus-visible { --glass-fill: rgba(10, 10, 10, .86); background: linear-gradient(var(--glass-fill), var(--glass-fill)) padding-box, var(--glass-rim) border-box; }
+
+/* ================================================================ NUMBERS: glass tiles */
+.stats { gap: clamp(12px, 1.2vw, 18px); border: 0; }
+.stat, .stat:first-child { padding: clamp(22px, 2.2vw, 32px); border-radius: var(--glass-r); }
+/* thin glass (the drone weaves behind tiles 1 + 3): open above, a denser frost under the label + note */
+.numbers .stat {
+  --glass-fill: rgba(255, 255, 255, .16); --glass-blur: blur(5px) saturate(140%);
+  background: linear-gradient(to top, rgba(255, 255, 255, .84) 0, rgba(255, 255, 255, .84) 96px, rgba(255, 255, 255, .16) 128px) padding-box, var(--glass-rim) border-box;
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .numbers .stat { background: linear-gradient(rgba(255, 255, 255, .93), rgba(255, 255, 255, .93)) padding-box, var(--glass-rim) border-box; }
+}
+.stat + .stat { border-left: 1px solid transparent; }
+@media (max-width: 1024px) {
+  .stat:nth-child(3) { border-left: 1px solid transparent; padding-left: clamp(22px, 2.2vw, 32px); }
+  .stat:nth-child(n + 3) { border-top: 1px solid transparent; }
+}
+@media (max-width: 640px) {
+  .stat, .stat:first-child { padding: 24px; }
+  .stat + .stat { border-top: 1px solid transparent; border-left: 1px solid transparent; }
+}
+
+/* ================================================================ WORK: glass rail cards, the readout clears them */
+html.rail .case__row { border-radius: calc(var(--glass-r) + 4px); overflow: hidden; }
+html.rail .case__row .case__thumb { margin: 10px 10px clamp(12px, 2vh, 20px); border-radius: var(--glass-r); border: 0; height: calc(100% - 10px); }
+html.rail .case__row::before { border-radius: inherit; }
+html.rail .case--last .case__row { --glass-fill: rgba(10, 10, 10, .9); --glass-rim: linear-gradient(150deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, .05)); --glass-hi: inset 0 1px 0 rgba(255, 255, 255, .14); background: linear-gradient(var(--glass-fill), var(--glass-fill)) padding-box, var(--glass-rim) border-box; }
+@media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
+  html.rail .cases__pin, .process.is-pinned .process__pin { padding-bottom: 76px; }
+}
+
+/* ================================================================ PROCESS: glass step panel + index chips */
+.process.is-pinned .steps { padding: clamp(28px, 3vw, 44px); border-radius: calc(var(--glass-r) + 6px); }
+.process.is-pinned .process__index { gap: 8px; }
+.process__index li { border-radius: 999px; padding: 8px 14px; }
+.process.is-pinned .process__index li.is-active { --glass-fill: rgba(255, 255, 255, .16); }
+
+/* ================================================================ QUOTE */
+.quote__by { display: inline-flex; padding: 10px 18px; border-radius: 999px; }
+
+/* ================================================================ CONTACT */
+.cta__main { grid-column: 1 / -1; }
+.cta .cta__title { font-size: clamp(56px, 10vw, 164px); margin-block: clamp(28px, 3vw, 44px) clamp(36px, 4vw, 64px); }
+.cta__row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--col-gap); row-gap: 28px; align-items: center; }
+.cta__row .cta__lead { grid-column: 1 / span 5; max-width: 32em; }
+.cta__row .cta__actions { grid-column: 7 / -1; margin-top: 0; }
+.cta .cta__info { grid-column: 1 / -1; border-top: 0; padding-top: 0; gap: clamp(12px, 1.2vw, 18px); margin-top: clamp(48px, 6vw, 88px); }
+.cta__info > div { padding: 18px 22px; border-radius: var(--glass-r); }
+@media (max-width: 640px) { .cta .cta__title { font-size: clamp(42px, 13.4vw, 72px); } }
+@media (max-width: 1024px) {
+  .cta__row { grid-template-columns: 1fr; }
+  .cta__row .cta__lead, .cta__row .cta__actions { grid-column: 1; }
+}
+
+/* ================================================================ FOOTER */
+.footer__top { padding: clamp(28px, 3vw, 48px); border-radius: calc(var(--glass-r) + 8px); }
+.footer__bar { margin-top: 16px; padding: 12px 12px 12px 24px; border-radius: 999px; border-top: 1px solid transparent; }
+@media (max-width: 640px) { .footer__bar { border-radius: var(--glass-r); padding: 16px 18px; } }
+
+/* ================================================================ HUD: dark glass chip (always readable) */
+.hud {
+  color: var(--white); mix-blend-mode: normal; padding: 9px 16px; border-radius: 999px; bottom: 16px;
+  --glass-fill: rgba(10, 10, 10, .62);
+}
+/* on dark bands the chip stays dark glass (the rim separates it): white type over the footer wordmark stays legible */
+.hud.is-dark { --glass-fill: rgba(22, 22, 24, .72); }
+/* yields to content: fades out while the chip would sit on a card, text block or control (flight-bridge.ts) */
+html.flight-on .hud.is-on.is-yield { opacity: 0; transition-duration: .25s; }
+
+/* ================================================================ THE ACCESS PASS (fixed, top right) */
+.pass { position: fixed; top: 0; right: 0; z-index: 820; width: var(--pass-w); height: var(--pass-h); pointer-events: none; }
+.pass__canvas { position: absolute; inset: 0; }
+.pass__canvas canvas { pointer-events: none !important; }
+.pass__hit {
+  position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: auto; touch-action: none;
+  cursor: grab; border-radius: 10px; -webkit-tap-highlight-color: transparent;
+}
+.pass.is-dragging .pass__hit { cursor: grabbing; }
+.pass__static {
+  display: none; position: absolute; top: 0; height: auto;
+  width: calc(var(--pass-card) * 1.0714); right: calc(var(--pass-c) - var(--pass-card) * .5357);
+}
+html.rm .pass__static, html[data-tier='nogl'] .pass__static { display: block; }
+.pass__static-card { transform-origin: 200px 160px; transform: rotate(-3deg); }
+.pass__svg-k { font: 500 6.5px var(--f-mono); letter-spacing: .14em; fill: rgba(255, 255, 255, .55); }
+.pass__svg-v { font: 500 7.5px var(--f-mono); letter-spacing: .06em; fill: #fff; }
+.pass__svg-holder { font: 700 34px var(--f-display); letter-spacing: -0.05em; fill: #fff; }
+.pass__hint {
+  position: absolute; right: var(--pass-c); top: calc(var(--pass-card) * 2.42); transform: translate(50%, 6px);
+  display: none; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; white-space: nowrap;
+  color: var(--black); opacity: 0; transition: opacity .5s linear, transform .5s var(--ease-expo);
+}
+.pass__dot { width: 6px; height: 6px; border-radius: 50%; border: 1px solid currentColor; }
+@media (hover: hover) and (pointer: fine) and (min-width: 1025px) {
+  .pass__hint { display: inline-flex; }
+  .pass.is-live:not(.hint-done):not(.is-tucked) .pass__hint { opacity: 1; transform: translate(50%, 0); transition-delay: .9s; }
+}
+/* the full-screen phone menu covers the pass */
+html:has(.menu.is-open) .pass { visibility: hidden; }

@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import ContactForm from '../components/ContactForm.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { site } from '../data/site';
+
+const { meta } = site;
+---
+<Base
+  title="Contact"
+  description={`Tell ${meta.name} what your team is working around today. We reply within one working day.`}
+  path="/contact"
+  flight={false}
+>
+  <JsonLd slot="head" page="contact" />
+  <Nav slot="header" />
+  <section class="contact-page band sec">
+    <div class="wrap contact-page__wrap">
+      <header class="contact-page__head">
+        <p class="t-kicker muted">Contact</p>
+        <h1 class="t-h2">Let's build the next one.</h1>
+        <p class="t-lead muted">
+          Tell us what your team is working around today. We'll reply with a suggested product, a custom build plan, or both.
+        </p>
+      </header>
+
+      <div class="contact-page__grid">
+        <ContactForm />
+
+        <dl class="contact-page__info">
+          <div>
+            <dt class="t-kicker muted">Email</dt>
+            <dd class="t-meta"><a href={`mailto:${meta.email}`}>{meta.email}</a></dd>
+          </div>
+          <div>
+            <dt class="t-kicker muted">Studio</dt>
+            <dd class="t-meta">{meta.address}</dd>
+          </div>
+          <div>
+            <dt class="t-kicker muted">Response time</dt>
+            <dd class="t-meta">We reply within one working day.</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+  <Footer slot="footer" />
+</Base>
+
+<style>
+  .contact-page__wrap { max-width: 1100px; }
+  .contact-page__head { display: grid; gap: var(--sp-3); max-width: 56ch; margin-bottom: clamp(32px, 4vw, 56px); }
+  .contact-page__grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(32px, 4vw, 72px); align-items: start; }
+  @media (max-width: 900px) { .contact-page__grid { grid-template-columns: 1fr; } }
+  .contact-page__info { display: grid; gap: var(--sp-6); align-content: start; }
+  .contact-page__info a { text-decoration: underline; text-underline-offset: 3px; }
+</style>

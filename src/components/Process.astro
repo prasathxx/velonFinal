@@ -1,0 +1,47 @@
+---
+// Desktop + motion: pinned, the steps advance with scroll (motion.ts setupProcess).
+// Tablet, phone and reduced motion: the same markup as a stacked list.
+// Home keeps this section as-is; /process reuses it unchanged and adds the commitments quotes below it.
+import { site, type Link } from '../data/site';
+import SectionHead from './SectionHead.astro';
+import RollLink from './RollLink.astro';
+interface Props { seeAll?: Link[] }
+const { seeAll } = Astro.props;
+const { process } = site;
+const N = process.steps.length;
+---
+<section id="process" class="process band tone-dark fx-bg" aria-labelledby="process-title" data-process style={`--n:${N}`} data-flight="process" data-flight-label="Process">
+  <div class="pool" aria-hidden="true" data-pool></div>
+  <div class="process__pin">
+    <div class="backdrop backdrop--dark" aria-hidden="true"></div>
+    <div class="wrap process__wrap">
+      <SectionHead id="process-title" num="03" eyebrow={process.eyebrow} title={process.title} intro={process.intro} />
+      <div class="process__stage">
+        <div class="process__big" aria-hidden="true">
+          {process.steps.map((s, i) => (
+            <span class="process__num" data-step-num={i}>{[...s.num].map((d) => <span class="d"><span>{d}</span></span>)}</span>
+          ))}
+          <span class="process__of t-label">/ {String(N).padStart(2, '0')}</span>
+        </div>
+        <div class="process__rail" aria-hidden="true"><i class="process__bar" data-process-bar></i></div>
+        <ol class="steps">
+          {process.steps.map((s, i) => (
+            <li class="step" data-step={i}>
+              <span class="step__num t-label">{s.num}</span>
+              <h3 class="step__title t-h2" data-step-part>{s.title}</h3>
+              <p class="step__body t-lead" data-step-part>{s.body}</p>
+            </li>
+          ))}
+        </ol>
+        <ol class="process__index" aria-hidden="true">
+          {process.steps.map((s, i) => <li class="t-label" data-step-idx={i}><span>{s.num}</span> {s.title}</li>)}
+        </ol>
+      </div>
+    </div>
+  </div>
+  {seeAll && (
+    <p class="wrap section__more section__more--dark" data-reveal="fade">
+      {seeAll.map((s) => <RollLink href={s.href} label={s.label} class="t-label section__more-link" />)}
+    </p>
+  )}
+</section>

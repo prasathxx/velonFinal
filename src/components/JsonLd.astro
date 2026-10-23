@@ -1,0 +1,42 @@
+---
+// Structured data (PLAN-v3 §SEO + owner audit item 13). Organization renders on every page that
+// includes this component; WebSite is home-only; ContactPage is /contact-only. Add sameAs to
+// Organization once the LinkedIn company URL exists.
+interface Props { page?: 'home' | 'contact' }
+const { page = 'home' } = Astro.props;
+
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Velon Labs',
+  legalName: 'Velon Super Intelligence LLP',
+  url: 'https://velonlabs.in',
+  logo: 'https://velonlabs.in/og.jpg',
+  email: 'hello@velonlabs.in',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Coimbatore',
+    addressRegion: 'Tamil Nadu',
+    addressCountry: 'IN',
+  },
+};
+
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Velon Labs',
+  url: 'https://velonlabs.in',
+  publisher: { '@type': 'Organization', name: 'Velon Labs' },
+};
+
+const contactPage = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact — Velon Labs',
+  url: 'https://velonlabs.in/contact',
+  about: { '@type': 'Organization', name: 'Velon Labs' },
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(org)} />
+{page === 'home' && <script type="application/ld+json" set:html={JSON.stringify(website)} />}
+{page === 'contact' && <script type="application/ld+json" set:html={JSON.stringify(contactPage)} />}

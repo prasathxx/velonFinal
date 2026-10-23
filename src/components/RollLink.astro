@@ -1,0 +1,13 @@
+---
+// Link with the six-yards char roll: two stacked copies of the label, the second rolls up on hover.
+// The readable label is a visually hidden span, the animated copies are aria-hidden.
+interface Props { href: string; label: string; class?: string; [k: string]: unknown }
+const { href, label, class: cls = '', ...rest } = Astro.props;
+const chars = [...label].map((c) => (c === ' ' ? ' ' : c));
+const external = /^https?:/.test(href);
+---
+<a href={href} class={`roll ${cls}`} data-roll {...(external ? { target: '_blank', rel: 'noopener' } : {})} {...rest}>
+  <span class="sr-only">{label}</span>
+  <span class="lk" aria-hidden="true">{chars.map((c) => <span class="ch">{c}</span>)}</span>
+  <span class="lk" aria-hidden="true">{chars.map((c) => <span class="ch">{c}</span>)}</span>
+</a>

@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Logos from '../components/Logos.astro';
+import Solutions from '../components/Solutions.astro';
+import Process from '../components/Process.astro';
+import Numbers from '../components/Numbers.astro';
+import Cases from '../components/Cases.astro';
+import Quote from '../components/Quote.astro';
+import Cta from '../components/Cta.astro';
+import Footer from '../components/Footer.astro';
+import JsonLd from '../components/JsonLd.astro';
+const HOME_DESCRIPTION = 'Ready-to-run software for schools, property and ecommerce, plus custom AI builds for everything else — live in weeks, with one named contact after launch.';
+---
+<Base title="AI-first software for schools, property and ecommerce" description={HOME_DESCRIPTION} path="/">
+  <JsonLd slot="head" />
+  <Nav slot="header" />
+  <Hero />
+  <Logos />
+  <Solutions seeAll={[
+    { label: 'See all products →', href: '/products' },
+    { label: 'See all services →', href: '/services' },
+    { label: 'How engagement works →', href: '/products#engagement' },
+  ]} />
+  <Process seeAll={[{ label: 'See our full process →', href: '/process' }]} />
+  <Numbers />
+  <Cases seeAll={[{ label: 'See all focus areas →', href: '/focus' }]} />
+  <Quote />
+  <Cta />
+  <Footer slot="footer" />
+</Base>

@@ -1,0 +1,30 @@
+---
+// Custom 404: no drone/HUD (flight={false}), opens on content per the working-screens convention.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Label from '../components/Label.astro';
+import Button from '../components/Button.astro';
+---
+<Base title="Page not found" path="/404" flight={false} description="This page doesn't exist. Find your way back to Velon Labs' home or products.">
+  <Nav slot="header" />
+  <section class="band sec notfound" aria-labelledby="notfound-title">
+    <div class="wrap notfound__in">
+      <Label num="404" text="Not found" />
+      <h1 id="notfound-title" class="t-statement notfound__title">This page took a wrong turn.</h1>
+      <p class="t-lead muted notfound__lead">The link's broken or the page has moved. Head back home, or see what we build.</p>
+      <div class="notfound__actions">
+        <Button href="/" label="Back to home" magnetic />
+        <Button href="/products" label="See products" variant="ghost" />
+      </div>
+    </div>
+  </section>
+  <Footer slot="footer" />
+</Base>
+
+<style>
+  .notfound__in { min-height: 60svh; display: flex; flex-direction: column; justify-content: center; gap: clamp(16px, 2vw, 24px); }
+  .notfound__title { max-width: 16ch; }
+  .notfound__lead { max-width: 48ch; }
+  .notfound__actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: clamp(8px, 1vw, 16px); }
+</style>

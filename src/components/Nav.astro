@@ -1,0 +1,42 @@
+---
+// Fixed header: a frosted glass capsule. It flips to dark glass while a black band runs under it
+// (motion.ts setupNav) and stops short of the right edge, which belongs to the hanging access pass.
+import { site } from '../data/site';
+import Wordmark from './Wordmark.astro';
+import RollLink from './RollLink.astro';
+import Button from './Button.astro';
+const { nav, meta } = site;
+// on the home page "#top" smooth-scrolls (motion.ts setupAnchors); on every other page it must
+// navigate home instead — #top doesn't exist there, and scrolling the current page to 0 would be wrong.
+const isHome = Astro.url.pathname === '/';
+---
+<header class="nav" data-nav>
+  <div class="nav__in wrap">
+    <a href={isHome ? '#top' : '/'} class="nav__brand" aria-label={`${meta.name}, back to top`} data-cursor-off><Wordmark /></a>
+    <nav class="nav__links" aria-label="Primary">
+      <ul>
+        {nav.links.map((l) => <li><RollLink href={l.href} label={l.label} class="t-meta nav__link" /></li>)}
+      </ul>
+    </nav>
+    <Button href={nav.cta.href} label={nav.cta.label} size="sm" class="nav__cta" arrow={false} />
+    <button class="nav__menu t-label" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>
+      <span class="nav__menu-t" data-menu-label>Menu</span>
+      <span class="nav__menu-i" aria-hidden="true"><i></i><i></i></span>
+    </button>
+  </div>
+</header>
+
+<div class="menu tone-dark" id="menu" data-menu aria-hidden="true" inert>
+  <div class="menu__in wrap">
+    <p class="t-label muted menu__k">Menu</p>
+    <ul class="menu__list">
+      {nav.links.map((l, i) => (
+        <li><a class="menu__link" href={l.href} data-menu-link><span class="menu__n t-label">0{i + 1}</span><span class="menu__t">{l.label}</span></a></li>
+      ))}
+    </ul>
+    <div class="menu__foot">
+      <a class="t-meta menu__mail" href={`mailto:${meta.email}`}>{meta.email}</a>
+      <p class="t-label muted">{meta.address}</p>
+    </div>
+  </div>
+</div>

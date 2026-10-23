@@ -1,0 +1,38 @@
+---
+// Contact. The statement is the stage for the drone's last moment: it drops in behind the outline line
+// (seen through the hollow letters, which are a front plane), in front of the solid one, and turns to
+// face the visitor. The access pass now lives in the fixed layer at the top right (Base.astro).
+import { site } from '../data/site';
+import Label from './Label.astro';
+import Button from './Button.astro';
+import RollLink from './RollLink.astro';
+const { cta } = site;
+---
+<section id="contact" class="cta band sec fx-bg" aria-labelledby="cta-title" data-flight="contact" data-flight-label="Contact">
+  <div class="backdrop backdrop--dots backdrop--cta" aria-hidden="true"></div>
+  <div class="wrap cta__grid">
+    <div class="cta__main">
+      <Label num="07" text={cta.eyebrow} data-reveal="fade" />
+      <h2 id="cta-title" class="t-statement cta__title" data-reveal="lines">
+        {cta.lines.map((l, i) => {
+          const outline = i === cta.outlineLineIndex;
+          return <>{i > 0 && ' '}<span class={`ln${outline ? ' is-outline is-fore' : ''}`} data-depth={outline ? 0.5 : -0.5}>{l}</span></>;
+        })}
+      </h2>
+      <div class="cta__row">
+        <p class="t-lead cta__lead" data-reveal="fade">{cta.lead}</p>
+        <div class="cta__actions" data-reveal="fade" data-delay="0.1">
+          <Button href={cta.button.href} label={cta.button.label} magnetic data-cursor-off />
+          <RollLink href={`mailto:${cta.email}`} label={cta.email} class="t-lead cta__mail" />
+        </div>
+      </div>
+    </div>
+
+    <dl class="cta__info" data-reveal="stagger">
+      {cta.note && <div><dt class="t-kicker muted">Response</dt><dd class="t-meta">{cta.note}</dd></div>}
+      <div><dt class="t-kicker muted">Email</dt><dd class="t-meta"><a href={`mailto:${cta.email}`}>{cta.email}</a></dd></div>
+      {site.meta.phone && <div><dt class="t-kicker muted">Phone</dt><dd class="t-meta"><a href={`tel:${site.meta.phone.replace(/\s/g, '')}`}>{site.meta.phone}</a></dd></div>}
+      <div><dt class="t-kicker muted">Studio</dt><dd class="t-meta">{site.meta.address}</dd></div>
+    </dl>
+  </div>
+</section>

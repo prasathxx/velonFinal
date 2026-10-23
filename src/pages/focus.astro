@@ -1,0 +1,20 @@
+---
+// Standalone Focus page: the home Cases component, with a fuller intro.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Cases from '../components/Cases.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base
+  title="Focus"
+  path="/focus"
+  flight={false}
+  description="Where Velon Labs builds: education, property, ecommerce, agencies, and anything else software should already have solved."
+>
+  <Nav slot="header" />
+  <Cases
+    id="focus"
+    intro="Five kinds of problem keep landing on our desk: a school that outgrew its spreadsheets, a landlord juggling rent across units, a store losing carts at checkout, an agency drowning in approvals, or something nobody's named yet. Each one points at a Velon product, or a custom build."
+  />
+  <Footer slot="footer" />
+</Base>

@@ -1,0 +1,55 @@
+---
+// Product detail page body (owner audit item 10): problem → features → who it's for → CTA, one
+// screen, open on content (no scroll story). Shared across /products/<slug>; each page file just
+// passes a slug. Content comes only from the offering's own `summary`/`problem`/`features`/`audience`
+// in site.ts — nothing here is invented.
+import { offeringBySlug } from '../data/site';
+import Label from './Label.astro';
+import Button from './Button.astro';
+interface Props { slug: string }
+const { slug } = Astro.props;
+const o = offeringBySlug(slug);
+---
+<section class="pdetail band sec" aria-labelledby="pdetail-title">
+  <div class="wrap pdetail__wrap">
+    <Label num={o.monogram} text={o.kind === 'product' ? 'Product' : 'Service'} />
+    <h1 id="pdetail-title" class="t-h2 pdetail__title">{o.name}</h1>
+    <p class="t-lead muted pdetail__summary">{o.summary}</p>
+
+    {o.problem && (
+      <div class="pdetail__block">
+        <h2 class="t-kicker muted">The problem</h2>
+        <p class="t-body">{o.problem}</p>
+      </div>
+    )}
+
+    {o.features && o.features.length > 0 && (
+      <div class="pdetail__block">
+        <h2 class="t-kicker muted">What it does</h2>
+        <ul class="pdetail__features t-body">
+          {o.features.map((f) => <li>{f}</li>)}
+        </ul>
+      </div>
+    )}
+
+    {o.audience && (
+      <div class="pdetail__block">
+        <h2 class="t-kicker muted">Who it's for</h2>
+        <p class="t-body">{o.audience}</p>
+      </div>
+    )}
+
+    <div class="pdetail__cta">
+      <Button href={`/contact?interest=${o.slug}`} label={`Talk to us about ${o.name}`} magnetic />
+    </div>
+  </div>
+</section>
+
+<style>
+  .pdetail__wrap { max-width: 760px; }
+  .pdetail__title { margin-top: var(--sp-3); }
+  .pdetail__summary { max-width: 48ch; margin-top: var(--sp-2); }
+  .pdetail__block { display: grid; gap: var(--sp-2); margin-top: clamp(28px, 3vw, 44px); }
+  .pdetail__features { display: grid; gap: var(--sp-2); padding-left: 1.2em; list-style: disc; }
+  .pdetail__cta { margin-top: clamp(36px, 4vw, 56px); }
+</style>

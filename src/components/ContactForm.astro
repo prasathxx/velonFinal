@@ -1,0 +1,264 @@
+---
+// The contact form: validates nothing itself (the server is the source of truth via zod) but
+// mirrors its shape so a visitor rarely hits a server-side error. States: idle, loading, success,
+// error. See PLAN-v3.md "Contact pipeline" and "Form".
+import { offerings } from '../data/site';
+import { getTurnstileSiteKey } from '../lib/turnstile';
+import { site } from '../data/site';
+
+const siteKey = getTurnstileSiteKey();
+const fallbackEmail = site.meta.email;
+---
+
+<form class="cform" id="contact-form" novalidate data-cform>
+  <div class="cform__row">
+    <div class="cform__field">
+      <label class="t-label muted" for="cf-name">Name</label>
+      <input class="cform__input" type="text" id="cf-name" name="name" autocomplete="name" required maxlength="100" />
+    </div>
+    <div class="cform__field">
+      <label class="t-label muted" for="cf-email">Email</label>
+      <input class="cform__input" type="email" id="cf-email" name="email" autocomplete="email" required maxlength="200" />
+    </div>
+  </div>
+
+  <div class="cform__row">
+    <div class="cform__field">
+      <label class="t-label muted" for="cf-company">Company <span class="cform__optional">(optional)</span></label>
+      <input class="cform__input" type="text" id="cf-company" name="company" autocomplete="organization" maxlength="200" />
+    </div>
+    <div class="cform__field">
+      <label class="t-label muted" for="cf-phone">Phone <span class="cform__optional">(optional)</span></label>
+      <input class="cform__input" type="tel" id="cf-phone" name="phone" autocomplete="tel" maxlength="20" pattern="[+\d\s-]*" />
+    </div>
+  </div>
+
+  <div class="cform__field">
+    <label class="t-label muted" for="cf-interest">What are you interested in?</label>
+    <select class="cform__input" id="cf-interest" name="interest" required>
+      {offerings.map((o) => <option value={o.slug}>{o.name}</option>)}
+      <option value="other">Something else</option>
+    </select>
+  </div>
+
+  <div class="cform__field">
+    <label class="t-label muted" for="cf-message">Message</label>
+    <textarea class="cform__input cform__textarea" id="cf-message" name="message" required minlength="10" maxlength="5000" rows="5"></textarea>
+  </div>
+
+  <!-- Honeypot: off-screen and unreachable by tab order, so sighted and assistive-tech visitors
+       never see or fill it. Bots filling every field trip this and get a 400. -->
+  <div class="cform__hp" aria-hidden="true">
+    <label for="cf-website">Website</label>
+    <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <input type="hidden" name="page" data-cf-page />
+  <input type="hidden" name="utmSource" data-cf-utm-source />
+  <input type="hidden" name="utmCampaign" data-cf-utm-campaign />
+  <input type="hidden" name="turnstileToken" data-cf-turnstile-token />
+
+  <div class="cform__consent">
+    <label class="cform__check">
+      <input type="checkbox" id="cf-consent" name="consent" required />
+      <span class="t-meta">I agree to the <a href="/privacy">privacy policy</a> and consent to being contacted about this enquiry.</span>
+    </label>
+  </div>
+
+  <div class="cform__turnstile" data-cf-turnstile-container data-sitekey={siteKey} aria-hidden="true"></div>
+
+  <div class="cform__actions">
+    <button type="submit" class="btn cform__submit" data-cf-submit>
+      <span class="btn__in"><span class="btn__t" data-cf-submit-label>Send message</span></span>
+      <svg class="btn__arrow" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+        <path d="M1 7h11M7.5 2.5 12 7l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+      </svg>
+    </button>
+  </div>
+  <p class="t-meta cform__altcontact">Or email <a href={`mailto:${fallbackEmail}`}>{fallbackEmail}</a></p>
+
+  <p class="t-meta cform__status" role="status" aria-live="polite" data-cf-status></p>
+</form>
+
+<script define:vars={{ fallbackEmail }}>
+  (function () {
+    const form = document.querySelector('[data-cform]');
+    if (!form) return;
+
+    const statusEl = form.querySelector('[data-cf-status]');
+    const submitBtn = form.querySelector('[data-cf-submit]');
+    const submitLabel = form.querySelector('[data-cf-submit-label]');
+    const tokenField = form.querySelector('[data-cf-turnstile-token]');
+    const pageField = form.querySelector('[data-cf-page]');
+    const utmSourceField = form.querySelector('[data-cf-utm-source]');
+    const utmCampaignField = form.querySelector('[data-cf-utm-campaign]');
+    const tsContainer = form.querySelector('[data-cf-turnstile-container]');
+    const interestField = form.querySelector('#cf-interest');
+
+    pageField.value = location.pathname;
+
+    // Capture utm_* on first landing only (sessionStorage), then reuse on every later submit
+    // (including across pages) within the same session.
+    (function captureUtm() {
+      try {
+        const params = new URLSearchParams(location.search);
+        const src = params.get('utm_source');
+        const camp = params.get('utm_campaign');
+        if (src && !sessionStorage.getItem('velon-utm-source')) sessionStorage.setItem('velon-utm-source', src);
+        if (camp && !sessionStorage.getItem('velon-utm-campaign')) sessionStorage.setItem('velon-utm-campaign', camp);
+        utmSourceField.value = sessionStorage.getItem('velon-utm-source') || '';
+        utmCampaignField.value = sessionStorage.getItem('velon-utm-campaign') || '';
+      } catch (e) {
+        /* sessionStorage unavailable (private mode, etc.) — utm fields stay empty */
+      }
+    })();
+
+    // Pre-select the offering from ?interest=
+    (function preselect() {
+      const params = new URLSearchParams(location.search);
+      const interest = params.get('interest');
+      if (interest && interestField) {
+        const match = Array.from(interestField.options).some((o) => o.value === interest);
+        if (match) interestField.value = interest;
+      }
+    })();
+
+    // Cloudflare Turnstile: load the widget script once, render explicitly into our container,
+    // and stash the token in the hidden field via its callback. Reset after every submit attempt
+    // since a token is single-use.
+    let widgetId = null;
+    window.__velonTurnstileReady = function () {
+      if (!window.turnstile || !tsContainer) return;
+      widgetId = window.turnstile.render(tsContainer, {
+        sitekey: tsContainer.getAttribute('data-sitekey'),
+        callback: function (token) { tokenField.value = token; },
+        'error-callback': function () { tokenField.value = ''; },
+        'expired-callback': function () { tokenField.value = ''; },
+      });
+    };
+    if (!document.getElementById('cf-turnstile-script')) {
+      const script = document.createElement('script');
+      script.id = 'cf-turnstile-script';
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__velonTurnstileReady&render=explicit';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    } else if (window.turnstile) {
+      window.__velonTurnstileReady();
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtn.classList.toggle('is-loading', isLoading);
+      if (submitLabel) submitLabel.textContent = isLoading ? 'Sending…' : 'Send message';
+    }
+
+    form.addEventListener('submit', async function (evt) {
+      evt.preventDefault();
+      setStatus('');
+
+      const fd = new FormData(form);
+      const payload = {
+        name: fd.get('name') || '',
+        email: fd.get('email') || '',
+        company: fd.get('company') || '',
+        phone: fd.get('phone') || '',
+        interest: fd.get('interest') || 'other',
+        message: fd.get('message') || '',
+        page: fd.get('page') || '',
+        utmSource: fd.get('utmSource') || '',
+        utmCampaign: fd.get('utmCampaign') || '',
+        consent: form.querySelector('#cf-consent').checked,
+        website: fd.get('website') || '',
+        turnstileToken: fd.get('turnstileToken') || '',
+      };
+
+      if (!payload.consent) {
+        setStatus('Please agree to the privacy policy to continue.');
+        return;
+      }
+      if (!payload.turnstileToken) {
+        setStatus('Verifying you are human — please wait a moment and try again.');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.ok) {
+          form.reset();
+          form.classList.add('is-success');
+          setStatus(`Thanks, ${payload.name}. We'll reply within one working day.`);
+          try {
+            sessionStorage.setItem('velon-visitor-name', payload.name);
+          } catch (e) {
+            /* sessionStorage unavailable — the access pass just keeps its default label */
+          }
+          window.dispatchEvent(new CustomEvent('velon:visitor', { detail: { name: payload.name } }));
+        } else if (res.status === 502) {
+          setStatus(`Something went wrong saving your message. Please email us directly at ${data.fallbackEmail || fallbackEmail} — we've kept what you typed.`);
+        } else if (data.error === 'honeypot') {
+          setStatus('Something went wrong. Please try again.');
+        } else if (data.error === 'rate_limited') {
+          setStatus('Too many messages sent from here recently. Please try again in a few minutes, or email us directly.');
+        } else {
+          setStatus('Please check the form: some fields need attention.');
+        }
+      } catch (err) {
+        setStatus(`Network error. Please email us directly at ${fallbackEmail} — we've kept what you typed.`);
+      } finally {
+        setLoading(false);
+        if (widgetId !== null && window.turnstile) {
+          window.turnstile.reset(widgetId);
+          tokenField.value = '';
+        }
+      }
+    });
+  })();
+</script>
+
+<style>
+  .cform { display: grid; gap: var(--sp-6); max-width: 640px; }
+  .cform__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-6); }
+  @media (max-width: 640px) { .cform__row { grid-template-columns: 1fr; } }
+  .cform__field { display: grid; gap: var(--sp-2); }
+  .cform__optional { text-transform: none; letter-spacing: 0; color: var(--faint); }
+  .cform__input {
+    width: 100%; font: 400 var(--t-body)/1.4 var(--f-text); color: var(--fg);
+    padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--glass-fill);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    transition: border-color var(--dur-fast) linear;
+  }
+  .cform__input::placeholder { color: var(--faint); }
+  .cform__input:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-color: var(--fg); }
+  .cform__textarea { resize: vertical; min-height: 120px; }
+  select.cform__input { appearance: none; cursor: pointer; }
+
+  .cform__hp { position: absolute; width: 1px; height: 1px; overflow: hidden; left: -9999px; top: auto; }
+
+  .cform__consent { display: flex; }
+  .cform__check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .cform__check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--fg); flex: none; }
+  .cform__check a { text-decoration: underline; text-underline-offset: 3px; }
+
+  .cform__turnstile { min-height: 1px; }
+
+  .cform__actions { display: flex; align-items: center; gap: var(--sp-6); flex-wrap: wrap; }
+  .cform__submit.is-loading { opacity: .7; cursor: progress; }
+  .cform__submit:disabled { cursor: not-allowed; }
+  .cform__altcontact { margin-top: var(--sp-3); color: var(--muted); }
+  .cform__altcontact a { text-decoration: underline; text-underline-offset: 3px; color: var(--muted); }
+
+  .cform__status { min-height: 1.4em; }
+  .cform.is-success .cform__status { color: var(--fg); font-weight: 600; }
+</style>

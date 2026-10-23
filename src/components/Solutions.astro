@@ -1,0 +1,69 @@
+---
+// Products/services grid. Home uses the full catalog (unchanged look); /products and /services pass
+// a filtered `items` list plus their own copy (PLAN-v3: "reuse the home section in fuller form").
+import { site, hrefFor, offerings, type Offering, type Link } from '../data/site';
+import SectionHead from './SectionHead.astro';
+import Arrow from './Arrow.astro';
+import RollLink from './RollLink.astro';
+import { publicImage } from '../lib/public-image';
+interface Props {
+  items?: Offering[]; eyebrow?: string; title?: string; intro?: string;
+  num?: string; id?: string; seeAll?: Link[];
+}
+const {
+  items = offerings,
+  eyebrow = site.solutions.eyebrow,
+  title = site.solutions.title,
+  intro = site.solutions.intro,
+  num = '02',
+  id = 'solutions',
+  seeAll,
+} = Astro.props;
+// Only the home page passes the full mixed catalog (products + services together); /products and
+// /services each pass one kind, so this stays off there automatically.
+const hasMixedKinds = new Set(items.map((o) => o.kind)).size > 1;
+---
+<section id={id} class="solutions band sec fx-bg" aria-labelledby={`${id}-title`} data-flight="solutions" data-flight-label="Products">
+  <div class="backdrop backdrop--dots" aria-hidden="true"></div>
+  <div class="wrap">
+    <SectionHead id={`${id}-title`} num={num} eyebrow={eyebrow} title={title} intro={intro} depth={-0.3} />
+    <ul class="bento is-fore" data-wake data-depth="0.3">
+      {items.map((o, i) => (
+        <>
+          {hasMixedKinds && (i === 0 || items[i - 1].kind !== o.kind) && (
+            <li class="bento__group t-kicker muted">{o.kind === 'product' ? 'Products' : 'Services'}</li>
+          )}
+          <li class="bento__cell">
+          <a href={hrefFor(o)} class="card" data-tilt data-cursor="View" aria-label={`${o.name}: ${o.summary}`}>
+            <span class="card__sheen" aria-hidden="true"></span>
+            {publicImage(o.image) && <span class="card__img" aria-hidden="true" style={`background-image:url(${o.image})`}></span>}
+            <div class="card__top">
+              <span class="t-label card__num">{String(i + 1).padStart(2, '0')}</span>
+              <Arrow class="card__arrow" />
+            </div>
+            <div class="card__body">
+              <h3 class="t-h3 card__name">{o.name}</h3>
+              <p class="t-body card__sum">{o.summary}</p>
+              <ul class="card__tags" aria-label="Capabilities">
+                {o.tags.map((t) => <li class="t-kicker">{t}</li>)}
+              </ul>
+            </div>
+          </a>
+          </li>
+        </>
+      ))}
+    </ul>
+    {seeAll && (
+      <p class="section__more" data-reveal="fade">
+        {seeAll.map((s) => <RollLink href={s.href} label={s.label} class="t-label section__more-link" />)}
+      </p>
+    )}
+  </div>
+</section>
+
+<style>
+  /* Small kicker row spanning the bento grid, splitting the full catalog into Products / Services
+     (home only — hasMixedKinds is false on /products and /services, so this never renders there). */
+  .bento__group { grid-column: 1 / -1; padding: 14px clamp(24px, 2.4vw, 40px) 0; background: var(--bg); }
+  .bento__group:first-child { padding-top: 0; }
+</style>

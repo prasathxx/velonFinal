@@ -1,0 +1,164 @@
+/* v2 "Flight Plan": the 3D layer and the custom components (PLAN-v2 §4–§6). Monochrome only. */
+
+/* ================================================================ FLIGHT CANVAS + POSTER */
+.flight {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+  opacity: 0; transition: opacity .8s linear;
+}
+.flight.is-ready { opacity: 1; }
+.flight canvas { pointer-events: none !important; }
+
+/* poster: the hover pose as a still, only for reduced motion / no WebGL (lazy: never fetched otherwise) */
+.hero__poster {
+  display: none; position: absolute; z-index: 1; pointer-events: none; user-select: none;
+  right: clamp(8px, 4vw, 72px); top: calc(var(--nav-h) + 9vh); width: clamp(200px, 26vw, 400px); height: auto;
+}
+html.rm .hero__poster, html[data-tier='nogl'] .hero__poster { display: block; }
+@media (max-width: 640px) { .hero__poster { width: 108px; top: calc(var(--nav-h) + 50px); right: 8px; } }
+
+/* ================================================================ LOGOS: the drone's shadow crossing the band */
+.logos { overflow: clip; }
+.logos__shadow {
+  position: absolute; z-index: 2; top: 0; bottom: 0; left: -70px; width: 140px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(10, 10, 10, .07) 50%, transparent);
+  opacity: 0; transition: opacity .5s linear; will-change: transform;
+}
+.logos__shadow::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(10, 10, 10, .22); }
+
+/* ================================================================ SOLUTIONS: TiltCard + wake */
+html.js:not(.rm):not(.reveal-fallback) [data-wake] { visibility: hidden; }
+.bento__cell { perspective: 1200px; }
+.card { position: relative; transform-style: preserve-3d; }
+.card > :not(.card__sheen) { position: relative; }
+.card__sheen {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(520px circle at var(--sx, 50%) var(--sy, 50%), rgba(255, 255, 255, .11), transparent 62%);
+  transition: opacity .35s var(--ease-expo);
+}
+@media (hover: hover) and (pointer: fine) { .card:hover .card__sheen { opacity: 1; } }
+
+/* ================================================================ PROCESS: the drone's lamp */
+.pool {
+  position: fixed; left: -460px; top: -460px; width: 920px; height: 920px; z-index: 4; pointer-events: none;
+  border-radius: 50%; opacity: 0; mix-blend-mode: screen; will-change: transform, opacity;
+  background: radial-gradient(circle, rgba(255, 255, 255, .13), rgba(255, 255, 255, .04) 30%, transparent 50%);
+}
+html.rm .pool { display: none; }
+
+/* ================================================================ CASES: horizontal rail (desktop) */
+.cases__count, .cases__progress { display: none; }
+.cases__vp { overflow-x: clip; }
+.cases__list.wrap { max-width: var(--max); }
+.case__mono { display: none; }
+
+html.rail .cases { padding-block: 0; }
+html.rail .cases__pin {
+  height: 100svh; min-height: 680px; display: flex; flex-direction: column;
+  padding-top: calc(var(--nav-h) + clamp(20px, 3.4vh, 40px)); padding-bottom: clamp(20px, 3vh, 32px);
+}
+html.rail .cases__head { position: relative; }
+html.rail .cases .head { margin-bottom: clamp(20px, 3.4vh, 40px); }
+html.rail .cases__count { display: block; position: absolute; right: var(--gutter); bottom: 4px; font-variant-numeric: tabular-nums; }
+html.rail .cases__vp { flex: 1; min-height: 0; }
+html.rail .cases__list.wrap {
+  display: flex; gap: 20px; height: 100%; width: max-content; max-width: none; margin: 0; will-change: transform;
+}
+html.rail .case { flex: none; width: 56vw; max-width: 900px; height: 100%; }
+html.rail .case__rule, html.rail .case--end { display: none; }
+html.rail .case__row {
+  height: 100%; padding: 0 0 clamp(20px, 2.6vh, 30px);
+  grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) auto auto; column-gap: 24px; row-gap: 12px;
+  align-items: end; background: var(--paper); border: 1px solid var(--line);
+}
+html.rail .case__row::before { inset: 0; }
+html.rail .case__row .case__thumb {
+  grid-column: 1 / -1; grid-row: 1; align-self: stretch; position: relative; inset: auto; right: auto; top: auto;
+  display: flex; flex-direction: column; justify-content: space-between; width: auto; aspect-ratio: auto; height: 100%;
+  margin-bottom: clamp(12px, 2vh, 20px); padding: 20px 24px; opacity: 1; transform: none;
+  background-color: var(--grey-200); color: var(--grey-700); border-bottom: 1px solid var(--line); overflow: hidden;
+}
+html.rail .case__row:hover .case__thumb { transform: none; }
+html.rail .case__mono {
+  display: block; align-self: flex-end; font: 700 clamp(110px, 13vw, 220px)/.8 var(--f-display); letter-spacing: -0.06em;
+  color: rgba(10, 10, 10, .08); margin: -6px -8px 0 0;
+}
+html.rail .case__client { grid-column: 1; grid-row: 2; padding-left: 28px; }
+html.rail .case__meta { grid-column: 2; grid-row: 2; justify-self: end; padding-right: 28px; }
+html.rail .case__outcome { grid-column: 1; grid-row: 3; padding-left: 28px; max-width: 24ch; font-size: clamp(24px, 2.2vw, 36px); line-height: 1.08; }
+html.rail .case__arrow { grid-column: 2; grid-row: 3; padding-right: 28px; align-self: end; }
+html.rail .case--last .case__row { background: var(--black); color: var(--white); --muted: var(--grey-400); --line: rgba(255, 255, 255, .16); }
+html.rail .case--last .case__thumb { filter: invert(1); }
+html.rail .case--last .case__row::before { background: var(--white); }
+html.rail .case--last .case__row:hover { color: var(--black); }
+html.rail .cases__progress { display: block; margin-top: clamp(14px, 2.2vh, 24px); }
+.cases__bar { display: block; height: 1px; background: var(--line); }
+.cases__bar i { display: block; height: 100%; background: var(--fg); transform-origin: 0 50%; transform: scaleX(.2); }
+
+/* ================================================================ CTA */
+.cta__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--col-gap); row-gap: 40px; }
+.cta__main { grid-column: 1 / span 7; align-self: center; }
+.cta .cta__title { font-size: clamp(56px, 7vw, 120px); margin-block: clamp(28px, 3vw, 44px) clamp(28px, 3vw, 44px); }
+.cta__main .cta__lead { max-width: 32em; }
+.cta__main .cta__actions { margin-top: clamp(28px, 3vw, 40px); }
+.cta .cta__info { grid-column: 1 / -1; margin-top: 0; }
+@media (max-width: 1024px) {
+  .cta__grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .cta__main { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .cta__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cta .cta__title { font-size: clamp(42px, 13vw, 72px); }
+}
+
+/* ================================================================ HUD (desktop, flight on) */
+.hud {
+  position: fixed; left: var(--gutter); bottom: 18px; z-index: 800; display: none; align-items: center; gap: 8px;
+  color: var(--white); mix-blend-mode: difference; pointer-events: none; font-variant-numeric: tabular-nums;
+  opacity: 0; transition: opacity .5s linear;
+}
+.hud b { font-weight: 500; }
+.hud__sep { opacity: .5; }
+.hud__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: hudblink 1.6s steps(2, jump-none) infinite; }
+@keyframes hudblink { 50% { opacity: .2; } }
+@media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
+  html.flight-on .hud { display: flex; }
+  html.flight-on .hud.is-on { opacity: 1; }
+}
+
+/* ================================================================ FOOTER credits */
+.footer__legal { display: grid; gap: 6px; }
+.footer__credits { opacity: .8; }
+
+/* scripts/poster.mjs renders the hover pose alone on a transparent page */
+html.poster-mode, html.poster-mode body { background: transparent !important; }
+html.poster-mode body > :not(#flight) { opacity: 0 !important; }
+
+/* ================================================================ PHOTOS (v3.1): card + focus imagery
+   Monochrome photos fill the open upper half of each product card and the focus thumbs. They fade into
+   the frosted copy panel so text contrast is unchanged; cards without a file keep the glass/pattern look. */
+.card__img {
+  position: absolute !important; inset: 0 0 38% 0; z-index: 0; pointer-events: none;
+  border-radius: calc(var(--glass-r) - 1px) calc(var(--glass-r) - 1px) 0 0;
+  background: center / cover no-repeat; filter: grayscale(1) contrast(1.04);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  opacity: .92; transition: opacity .45s var(--ease-expo), transform .8s var(--ease-expo);
+}
+.card__top { z-index: 1; }
+.card__img + .card__top .card__num, .card__img + .card__top .card__arrow { color: var(--black); opacity: 1; }
+.card__img + .card__top .card__num, .card__img + .card__top .card__arrow {
+  padding: 4px 9px; margin: -4px -9px; border-radius: var(--radius-pill); background: rgba(255, 255, 255, .72);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+@media (hover: hover) {
+  .card:hover .card__img { opacity: .38; transform: scale(1.03); }
+  .card:hover .card__img + .card__top .card__num, .card:hover .card__img + .card__top .card__arrow { background: rgba(10, 10, 10, .5); color: var(--white); }
+}
+.card:focus-visible .card__img { opacity: .38; }
+.case__thumb.has-img { background-size: cover; background-position: center; filter: grayscale(1); }
+html.rail .case__thumb.has-img .case__mono { display: none; }
+html.rail .case__thumb.has-img .case__thumb-k {
+  align-self: flex-start; padding: 5px 10px 4px; border-radius: var(--radius-pill); background: rgba(255, 255, 255, .78); color: var(--black);
+}
+html.rail .case--last .case__thumb.has-img { filter: grayscale(1); }
+@media (prefers-reduced-motion: reduce) { .card__img { transition: none; } .card:hover .card__img { transform: none; } }

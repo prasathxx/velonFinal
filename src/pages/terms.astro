@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { site } from '../data/site';
+
+const { meta } = site;
+const VERSION_DATE = '2026-10-21';
+---
+<Base title="Terms" description={`The terms for using the ${meta.name} marketing website.`} path="/terms" flight={false}>
+  <Nav slot="header" />
+  <LegalPage title="Terms of use" versionDate={VERSION_DATE} intro="Short terms for a marketing website — this site describes our products and services and lets you get in touch. It is not itself a software product.">
+    <h2>Who this is</h2>
+    <p>This website is published by Velon Super Intelligence LLP ("Velon Labs", "we", "us"), based in Coimbatore, Tamil Nadu, India.</p>
+
+    <h2>Using this site</h2>
+    <p>You're welcome to browse this site, read about our products and services, and contact us. You agree not to misuse it — for example, by attempting to disrupt the site, scrape it at scale, or submit the contact form with false or malicious content.</p>
+
+    <h2>Content and accuracy</h2>
+    <p>We try to keep the product and service descriptions on this site accurate and current, but features, availability and pricing can change. Nothing on this site is a binding offer; a quote or agreement for a specific product or custom build is made separately, in writing, once we've talked.</p>
+
+    <h2>Intellectual property</h2>
+    <p>The text, design, graphics and code of this website belong to Velon Super Intelligence LLP unless otherwise credited (for example, the drone model credited in the footer). You may not reproduce or redistribute this site's content for commercial use without our permission.</p>
+
+    <h2>No warranty</h2>
+    <p>This site is provided as-is. We make reasonable efforts to keep it available and accurate, but we don't guarantee it will be uninterrupted, error-free, or fit for a particular purpose.</p>
+
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of India, and any dispute is subject to the jurisdiction of the courts in Coimbatore, Tamil Nadu.</p>
+
+    <h2>Changes to these terms</h2>
+    <p>We may update these terms as the site and our offering evolve. The version date at the top of this page shows when it was last changed.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about these terms: <a href={`mailto:${meta.email}`}>{meta.email}</a>.</p>
+  </LegalPage>
+  <Footer slot="footer" />
+</Base>
